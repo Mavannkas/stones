@@ -9,7 +9,7 @@ export class AppController {
 
   @Get()
   getData() {
-    console.log("XD")
+    // console.log("XDd")
     return this.appService.getData();
   }
 }
