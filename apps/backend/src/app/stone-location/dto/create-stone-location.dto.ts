@@ -1,5 +1,5 @@
 import {
-  IsDate,
+  IsDateString,
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
@@ -21,7 +21,7 @@ export class CreateStoneLocationDto implements CreateStoneLocationBody {
   @IsNotEmpty()
   createdBy: string;
 
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty()
   findingDay: Date;
 
@@ -55,6 +55,7 @@ export class CreateStoneLocationDto implements CreateStoneLocationBody {
   @IsNotEmpty()
   description: string;
 
+  @IsOptional()
   @IsString()
   @MaxLength(255)
   street?: string;
