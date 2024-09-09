@@ -43,4 +43,4 @@ export class StoneLocation implements StoneLocationObject {
 }
 
 export type StoneLocationDocument = HydratedDocument<StoneLocation>;
-export const CatSchema = SchemaFactory.createForClass(StoneLocation);
+export const StoneLocationSchema = SchemaFactory.createForClass(StoneLocation);

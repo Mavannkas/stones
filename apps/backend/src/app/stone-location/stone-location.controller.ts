@@ -19,7 +19,8 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as _ from 'multer';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { ImageCompressionInterceptor } from '../../common/interceptors/image-compression-interceptor.interceptor';
+import { getUnExistingFileName } from '../utils/files.utils';
 
 @Controller('stone-location')
 export class StoneLocationController {
@@ -31,14 +32,12 @@ export class StoneLocationController {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, cb) => {
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
-          cb(null, `${randomName}${extname(file.originalname)}`);
+          const name = getUnExistingFileName('./uploads', file.originalname);
+          cb(null, name);
         },
       }),
-    })
+    }),
+    ImageCompressionInterceptor
   )
   create(
     @Body() createStoneLocationDto: CreateStoneLocationDto,
@@ -54,8 +53,7 @@ export class StoneLocationController {
     )
     files: Array<Express.Multer.File>
   ) {
-    console.log(files);
-    return this.stoneLocationService.create(createStoneLocationDto);
+    return this.stoneLocationService.create(createStoneLocationDto, files);
   }
 
   @Get()
@@ -70,6 +68,7 @@ export class StoneLocationController {
 
   @Patch(':id')
   update(
+    //Improve validation to check if the id is a valid ObjectId
     @Param('id') id: string,
     @Body() updateStoneLocationDto: UpdateStoneLocationDto
   ) {
