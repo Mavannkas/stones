@@ -14,10 +14,13 @@ export class ImageCompressionInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler
   ): Promise<Observable<void>> {
+    console.log('ImageCompressionInterceptor');
     const req = context.switchToHttp().getRequest();
+    console.log(req.files);
     const multerFiles = req.files as Express.Multer.File[];
 
     for (const multerFile of multerFiles) {
+      console.log(multerFile);
       const data = await sharp(multerFile.path)
         .webp({ quality: 30 })
         .toBuffer();
