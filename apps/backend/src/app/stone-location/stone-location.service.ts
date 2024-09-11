@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { CreateStoneLocationDto } from './dto/create-stone-location.dto';
 import { UpdateStoneLocationDto } from './dto/update-stone-location.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { StoneLocation } from './entities/stone-location.entity';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class StoneLocationService {
-  create(createStoneLocationDto: CreateStoneLocationDto) {
-    return 'This action adds a new stoneLocation';
+  constructor(
+    @InjectModel(StoneLocation.name)
+    private stoneLocationModel: Model<StoneLocation>
+  ) {}
+
+  create(
+    createStoneLocationDto: CreateStoneLocationDto,
+    files: Array<Express.Multer.File>
+  ) {
+    const stoneLocation = new this.stoneLocationModel(createStoneLocationDto);
+    stoneLocation.images = files.map((file) => file.filename);
+
+    return stoneLocation.save();
   }
 
   findAll() {
-    return `This action returns all stoneLocation`;
+    return this.stoneLocationModel.find();
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} stoneLocation`;
+    return this.stoneLocationModel.findById(id);
   }
 
   update(id: string, updateStoneLocationDto: UpdateStoneLocationDto) {
-    return `This action updates a #${id} stoneLocation`;
+    return this.stoneLocationModel.findByIdAndUpdate(id, updateStoneLocationDto)
   }
 
   remove(id: string) {
-    return `This action removes a #${id} stoneLocation`;
+    return this.stoneLocationModel.findByIdAndDelete(id);
   }
 }
