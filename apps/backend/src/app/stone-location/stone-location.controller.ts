@@ -10,22 +10,33 @@ import {
   UploadedFiles,
   ParseFilePipeBuilder,
   UseFilters,
+  Query,
 } from '@nestjs/common';
 import { StoneLocationService } from './stone-location.service';
 import { CreateStoneLocationDto } from './dto/create-stone-location.dto';
 import { UpdateStoneLocationDto } from './dto/update-stone-location.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-
-// // Hack to fix "Cannot find module 'multer'" error
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import * as _ from 'multer';
 import { diskStorage } from 'multer';
 import { ImageCompressionInterceptor } from '../../common/interceptors/image-compression-interceptor.interceptor';
 import { getUnExistingFileName } from '../utils/files.utils';
 import { CheckObjectIdPipe } from '../../common/pipes/check-object-id.pipe';
-import { ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiConsumes,
+  ApiOkResponse,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { FilesUnlinkFilter } from './filters/files-unlink.filter';
-
+import { SearchStoneLocationDto } from './dto/search-stone-location.dto';
+import {
+  PaginatedResponse,
+  SearchStoneLocationResponse,
+  StoneLocationObject,
+} from '@stones/types';
+import { PaginatedResponseObject } from '../common/responses/paginated.response';
+import { StoneLocation } from './entities/stone-location.entity';
 @Controller('stone-location')
 @ApiTags('stone-location')
 export class StoneLocationController {
@@ -49,7 +60,7 @@ export class StoneLocationController {
     }),
     ImageCompressionInterceptor
   )
-  @UseFilters(new FilesUnlinkFilter("files"))
+  @UseFilters(new FilesUnlinkFilter('files'))
   create(
     @Body() createStoneLocationDto: CreateStoneLocationDto,
     @UploadedFiles(
@@ -68,8 +79,26 @@ export class StoneLocationController {
   }
 
   @Get()
-  findAll() {
-    return this.stoneLocationService.findAll();
+  @ApiOkResponse({
+    type: PaginatedResponseObject<StoneLocation>,
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(PaginatedResponseObject) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(StoneLocation) },
+            },
+          },
+        },
+      ],
+    },
+  })
+  search(
+    @Query() query: SearchStoneLocationDto
+  ): Promise<PaginatedResponseObject<StoneLocation>> {
+    return this.stoneLocationService.search(query);
   }
 
   @Get(':id')
